@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Poppins:wght@300;400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Poppins:wght@300;400&family=Roboto:wght@400;700&display=swap');
 @tailwind base;
@@ -16,4 +16,74 @@ h1,h2,h3,h4,h5,h6{
 
 span{
     font-family: 'Fredoka', sans-serif;
+} */
+
+/* Font Imports */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Poppins:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Poppins:wght@300;400&family=Roboto:wght@400;700&display=swap');
+
+/* Tailwind Setup */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light and Dark Mode Variables */
+:root {
+  --light-bg: #f0f8ff;
+  --light-text: #333;
+  --dark-bg: #1e1e1e;
+  --dark-text: #f1f1f1;
 }
+
+/* Default (Light Mode) */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--light-bg);
+  color: var(--light-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+/* Override specific styles when dark mode is active */
+body.dark-mode h1, 
+body.dark-mode h2, 
+body.dark-mode h3, 
+body.dark-mode h4, 
+body.dark-mode h5, 
+body.dark-mode h6 {
+  color: var(--dark-text);
+}
+
+/* Ensure the body has enough padding to account for the fixed navbar */
+body {
+    padding-top: 64px; /* Adjust this based on your navbar's height */
+  }
+  
+  /* Add styles for navbar-specific customizations */
+  nav {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+    z-index: 50; /* Ensure navbar appears on top of all other elements */
+  }
+  
+
+/* Optional: Adjust navbar, buttons, or other components */
+body.dark-mode .navbar,
+body.dark-mode .footer {
+  background-color: #333; /* Dark mode navbar/footer background */
+}
+
+body.dark-mode .button {
+  background-color: #444;
+  color: #fff;
+}
+
+/* Add more specific styles as needed for dark mode */

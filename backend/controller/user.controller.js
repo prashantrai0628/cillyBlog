@@ -1,13 +1,16 @@
 import { User } from "../models/user.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import bcrypt from "bcryptjs";
+import { sendMail } from "../utils/mailer.js";
 import createTokenAndSaveCookies from "../jwt/AuthToken.js";
+
 
 export const register = async (req, res) => {
   try {
     if (!req.files || Object.keys(req.files).length === 0) {
       return res.status(400).json({ message: "User photo is required" });
     }
+
     const { photo } = req.files;
     const allowedFormats = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedFormats.includes(photo.mimetype)) {
@@ -15,30 +18,23 @@ export const register = async (req, res) => {
         message: "Invalid photo format. Only jpg and png are allowed",
       });
     }
+
     const { email, name, password, phone, education, role } = req.body;
-    if (
-      !email ||
-      !name ||
-      !password ||
-      !phone ||
-      !education ||
-      !role ||
-      !photo
-    ) {
+    if (!email || !name || !password || !phone || !education || !role) {
       return res.status(400).json({ message: "Please fill required fields" });
     }
+
     const user = await User.findOne({ email });
     if (user) {
-      return res
-        .status(400)
-        .json({ message: "User already exists with this email" });
+      return res.status(400).json({ message: "User already exists with this email" });
     }
-    const cloudinaryResponse = await cloudinary.uploader.upload(
-      photo.tempFilePath
-    );
+
+    const cloudinaryResponse = await cloudinary.uploader.upload(photo.tempFilePath);
     if (!cloudinaryResponse || cloudinaryResponse.error) {
       console.log(cloudinaryResponse.error);
+      return res.status(500).json({ message: "Photo upload failed" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
       email,
@@ -52,29 +48,43 @@ export const register = async (req, res) => {
         url: cloudinaryResponse.url,
       },
     });
+
     await newUser.save();
-    if (newUser) {
-      let token = await createTokenAndSaveCookies(newUser._id, res);
-      console.log("Singup: ", token);
-      res.status(201).json({
-        message: "User registered successfully",
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role,
-          education: newUser.education,
-          avatar: newUser.avatar,
-          createdOn: newUser.createdOn,
-        },
-        token: token,
-      });
+
+    let token = await createTokenAndSaveCookies(newUser._id, res);
+    console.log("Signup: ", token);
+
+    // Send welcome email
+    const subject = "Welcome to Our Blog!";
+    const message = `Hi ${newUser.name},\n\nThank you for registering on our blog. We're excited to have you!\n\nBest,\nThe Blog Team`;
+
+    try {
+      await sendMail(newUser.email, subject, message);
+      console.log("Welcome email sent successfully!");
+    } catch (error) {
+      console.error("Failed to send welcome email:", error);
     }
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        education: newUser.education,
+        avatar: newUser.avatar,
+        createdOn: newUser.createdOn,
+      },
+      token: token,
+    });
+
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ error: "Internal Server error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 export const login = async (req, res) => {
   const { email, password, role } = req.body;
