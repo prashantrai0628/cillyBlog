@@ -5,6 +5,7 @@ import { IoCloseSharp } from "react-icons/io5";
 import { useAuth } from "../context/AuthProvider";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { BACKEND_URL } from "../utils/constant"; // Import BACKEND_URL
 
 function Navbar({ toggleDarkMode, isDarkMode }) {
   const [show, setShow] = useState(false);
@@ -16,7 +17,7 @@ function Navbar({ toggleDarkMode, isDarkMode }) {
     e.preventDefault();
     try {
       const { data } = await axios.get(
-        "http://localhost:4001/api/users/logout",
+        `${BACKEND_URL}/users/logout`,
         { withCredentials: true }
       );
       localStorage.removeItem("jwt");
@@ -138,6 +139,46 @@ function Navbar({ toggleDarkMode, isDarkMode }) {
             >
               CONTACT
             </Link>
+
+            {/* Dark Mode Toggle Button for Mobile */}
+            <button
+              onClick={toggleDarkMode}
+              className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all"
+            >
+              {isDarkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+
+            {/* Admin Dashboard Link for Mobile */}
+            {isAuthenticated && profile?.user?.role === "admin" && (
+              <Link
+                to="/dashboard"
+                onClick={() => setShow(!show)}
+                className="bg-blue-600 text-white font-semibold hover:bg-blue-800 duration-300 px-4 py-2 rounded"
+              >
+                DASHBOARD
+              </Link>
+            )}
+
+            {/* Login/Logout Button for Mobile */}
+            {!isAuthenticated ? (
+              <Link
+                to="/login"
+                onClick={() => setShow(!show)}
+                className="bg-red-600 text-white font-semibold hover:bg-red-800 duration-300 px-4 py-2 rounded"
+              >
+                LOGIN
+              </Link>
+            ) : (
+              <button
+                onClick={(e) => {
+                  handleLogout(e);
+                  setShow(!show);
+                }}
+                className="bg-red-600 text-white font-semibold hover:bg-red-800 duration-300 px-4 py-2 rounded"
+              >
+                LOGOUT
+              </button>
+            )}
           </ul>
         </div>
       )}
